@@ -1,0 +1,47 @@
+﻿<Window x:Class="HisenseTest.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HisenseTest"
+        xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="Hisense test utility" 
+        Height="300" 
+        Width="400" 
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+
+        <ListBox x:Name="TVList" Margin="20" Grid.Column="0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding DeviceName}" FontSize="18" Grid.Column="0"/>
+                        <TextBlock Text="{Binding IP}" FontSize="18" Grid.Column="1" Margin="20 0 0 0"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button x:Name="ScanTVButton" Content="Scan" Height="40" Margin="20" Grid.Column="1" Click="ScanTVButton_Click" />
+
+        <toolkit:IntegerUpDown Name="TVCommand" Height="40" Margin="20" Grid.Column="0" Grid.Row="1" FontSize="26" Value="001" FormatString="000000" />
+        <Button x:Name="SendCommandTVButton" Content="Send" Height="40" Margin="20" Grid.Column="1" Grid.Row="1" />
+
+
+
+    </Grid>
+</Window>
