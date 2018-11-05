@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HisenseTest"
-        xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="Hisense test utility" 
         Height="300" 
@@ -22,7 +21,7 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
-        <ListBox x:Name="TVList" Margin="20" Grid.Column="0">
+        <ListBox x:Name="TVList" Margin="20" Grid.Column="0" SelectionChanged="TVList_SelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -38,10 +37,8 @@
         </ListBox>
         <Button x:Name="ScanTVButton" Content="Scan" Height="40" Margin="20" Grid.Column="1" Click="ScanTVButton_Click" />
 
-        <toolkit:IntegerUpDown Name="TVCommand" Height="40" Margin="20" Grid.Column="0" Grid.Row="1" FontSize="26" Value="001" FormatString="000000" />
-        <Button x:Name="SendCommandTVButton" Content="Send" Height="40" Margin="20" Grid.Column="1" Grid.Row="1" />
-
-
+        <ComboBox Name="TVCommandsList" DisplayMemberPath="Name" Height="40" Margin="20" Grid.Column="0" Grid.Row="1" FontSize="18" SelectionChanged="TVList_SelectionChanged"/>
+        <Button x:Name="SendCommandTVButton" Content="Send key" Height="40" Margin="20" Grid.Column="1" Grid.Row="1" IsEnabled="False" Click="SendCommandTVButton_Click" />
 
     </Grid>
 </Window>
