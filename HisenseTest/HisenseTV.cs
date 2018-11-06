@@ -258,7 +258,7 @@ namespace HisenseTest
                                             {
                                                 s.SendTo(Encoding.ASCII.GetBytes("SUS\0"), new IPEndPoint(IP, cmdPort));
                                                 string cmd = $"\r\n1\r\n1HISENSE_DELIMITER2HISENSE_DELIMITER2HISENSE_DELIMITER{key}HISENSE_DELIMITER10HISENSE_DELIMITER0HISENSE_DELIMITER0\r\n\r\n\0";
-                                                cmd = "CMD " + (cmd.Length+10).ToString("000000") + cmd;
+                                                cmd = "CMD " + (cmd.Length + 10).ToString("000000") + cmd;
                                                 s.SendTo(Encoding.ASCII.GetBytes(cmd), new IPEndPoint(IP, cmdPort));
                                                 bufSize = s.Receive(buf);
                                                 s.SendTo(Encoding.ASCII.GetBytes("END 0000\r\n"), new IPEndPoint(IP, cmdPort));
@@ -275,6 +275,18 @@ namespace HisenseTest
                     }
                 });
             }
-        } 
+        }
+
+        public async Task SendMacroAsync(HisenseKeyMacro macro)
+        {
+            if (IsActive)
+            {
+                foreach (var key in macro.Commands)
+                {
+                    await SendKeyAsync(key);
+                    await Task.Delay(1000);
+                }
+            }
+        }
     }
 }

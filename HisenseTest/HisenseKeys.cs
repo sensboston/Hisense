@@ -85,7 +85,7 @@ namespace HisenseTest
         internal static string ToKeyName(this string name)
         {
             return name[4] + name.Substring(5).ToLower().Replace("elup", "el Up").Replace("eldown", "el Down")
-                .Replace("meup", "me Up").Replace("medown", "me Down").Replace("elline", "el Line").Replace("Ok", "OK");
+                .Replace("meup", "me Up").Replace("medown", "me Down").Replace("elline", "el Line");
         }
     }
 

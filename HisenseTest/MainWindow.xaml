@@ -17,7 +17,8 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="1.2*"/>
+            <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
 
@@ -39,6 +40,9 @@
 
         <ComboBox Name="TVCommandsList" DisplayMemberPath="Name" Height="40" Margin="20" Grid.Column="0" Grid.Row="1" FontSize="18" SelectionChanged="TVList_SelectionChanged"/>
         <Button x:Name="SendCommandTVButton" Content="Send key" Height="40" Margin="20" Grid.Column="1" Grid.Row="1" IsEnabled="False" Click="SendCommandTVButton_Click" />
+
+        <ComboBox Name="TVMacrosList" DisplayMemberPath="Name" Height="40" Margin="20" Grid.Column="0" Grid.Row="2" FontSize="18" SelectionChanged="TVList_SelectionChanged"/>
+        <Button x:Name="SendMacroTVButton" Content="Send macro" Height="40" Margin="20" Grid.Column="1" Grid.Row="2" IsEnabled="False" Click="SendMacroTVButton_Click" />
 
     </Grid>
 </Window>

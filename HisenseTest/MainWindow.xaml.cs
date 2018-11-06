@@ -1,14 +1,6 @@
-﻿//#define USE_BROADCAST
-
-using System;
-using System.Text;
+﻿using System;
 using System.Windows;
-using System.Net;
-using System.Net.Sockets;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Net.NetworkInformation;
 
 namespace HisenseTest
 {
@@ -24,6 +16,7 @@ namespace HisenseTest
             InitializeComponent();
 
             TVCommandsList.ItemsSource = HisenseKey.AllKeys;
+            TVMacrosList.ItemsSource = HisenseKeyMacro.AllMacros;
 
             HisenseTV.TVDiscovered += HisenseTV_TVDiscovered;
             HisenseTV.DiscoverTVs();
@@ -49,11 +42,17 @@ namespace HisenseTest
         private void TVList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             SendCommandTVButton.IsEnabled = (TVList.SelectedItem != null && TVCommandsList.SelectedItem != null);
+            SendMacroTVButton.IsEnabled = (TVList.SelectedItem != null && TVMacrosList.SelectedItem != null);
         }
 
         private async void SendCommandTVButton_Click(object sender, RoutedEventArgs e)
         {
             await (TVList.SelectedItem as HisenseTV).SendKeyAsync((TVCommandsList.SelectedItem as HisenseKey).Command);
+        }
+
+        private async void SendMacroTVButton_Click(object sender, RoutedEventArgs e)
+        {
+            await (TVList.SelectedItem as HisenseTV).SendMacroAsync((HisenseKeyMacro)TVMacrosList.SelectedItem);
         }
     }
 }
