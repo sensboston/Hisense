@@ -45,9 +45,9 @@ namespace HisenseTest
             SendMacroTVButton.IsEnabled = (TVList.SelectedItem != null && TVMacrosList.SelectedItem != null);
         }
 
-        private async void SendCommandTVButton_Click(object sender, RoutedEventArgs e)
+        private void SendCommandTVButton_Click(object sender, RoutedEventArgs e)
         {
-            await (TVList.SelectedItem as HisenseTV).SendKeyAsync((TVCommandsList.SelectedItem as HisenseKey).Command);
+            (TVList.SelectedItem as HisenseTV).SendKey((TVCommandsList.SelectedItem as HisenseKey).Command);
         }
 
         private async void SendMacroTVButton_Click(object sender, RoutedEventArgs e)

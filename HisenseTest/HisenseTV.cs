@@ -217,74 +217,81 @@ namespace HisenseTest
             }
         }
 
-        public async Task SendKeyAsync(string key)
+        public bool SendKey(string key)
         {
+            bool result = false;
             if (IsActive)
             {
-                await Task.Factory.StartNew(() =>
+                try
                 {
-                    try
+                    using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                     {
-                        using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                        string id = new Random().Next((ushort.MaxValue), int.MaxValue).ToString("0000000");
+                        s.SendTimeout = s.ReceiveTimeout = 500;
+                        s.Bind(new IPEndPoint(IPAddress.Any, 54000));
+                        s.SendTo(Encoding.ASCII.GetBytes($"CTCREATE\r\nID: {id}\r\n\r\n\0"), new IPEndPoint(IP, 60030));
+                        byte[] buf = new byte[256];
+                        int bufSize = s.Receive(buf);
+                        var received = Encoding.ASCII.GetString(buf, 0, bufSize);
+                        if (received.StartsWith("STATUS 500"))
                         {
-                            s.SendTimeout = s.ReceiveTimeout = 200;
-                            s.Bind(new IPEndPoint(IPAddress.Any, 54000));
-                            s.SendTo(Encoding.ASCII.GetBytes("CTCREATE\r\nID: 93901743\r\n\r\n\0"), new IPEndPoint(IP, 60030));
-                            byte[] buf = new byte[256];
-                            int bufSize = s.Receive(buf);
-                            var received = Encoding.ASCII.GetString(buf, 0, bufSize);
-                            if (received.StartsWith("STATUS 500"))
+                            // Parse actual connection port
+                            received = received.Substring(received.IndexOf("PORT:") + 5);
+                            var portStr = received.Substring(0, received.IndexOf("\r"));
+                            if (int.TryParse(portStr, out int port))
                             {
-                                // Parse actual connection port
-                                received = received.Substring(received.IndexOf("PORT:") + 5);
-                                var portStr = received.Substring(0, received.IndexOf("\r"));
-                                if (int.TryParse(portStr, out int port))
+                                s.SendTo(Encoding.ASCII.GetBytes("SUS\0"), new IPEndPoint(IP, port));
+                                s.SendTo(Encoding.ASCII.GetBytes($"CTCREATE\r\nMAC: appmac_appmac_app\r\nVERSION: 0001\r\n\r\n\0"), new IPEndPoint(IP, port));
+                                bufSize = s.Receive(buf);
+                                received = Encoding.ASCII.GetString(buf, 0, bufSize);
+                                if (received.StartsWith("STATUS 500"))
                                 {
-                                    s.SendTo(Encoding.ASCII.GetBytes("SUS\0"), new IPEndPoint(IP, port));
-                                    s.SendTo(Encoding.ASCII.GetBytes($"CTCREATE\r\nMAC: appmac_appmac_app\r\nVERSION: 0001\r\n\r\n\0"), new IPEndPoint(IP, port));
+                                    s.SendTo(Encoding.ASCII.GetBytes($"CCCREATE\r\nID: {id}\r\n\r\n\0"), new IPEndPoint(IP, port));
                                     bufSize = s.Receive(buf);
                                     received = Encoding.ASCII.GetString(buf, 0, bufSize);
                                     if (received.StartsWith("STATUS 500"))
                                     {
-                                        s.SendTo(Encoding.ASCII.GetBytes($"CCCREATE\r\nID: 93901743\r\n\r\n\0"), new IPEndPoint(IP, port));
-                                        bufSize = s.Receive(buf);
-                                        received = Encoding.ASCII.GetString(buf, 0, bufSize);
-                                        if (received.StartsWith("STATUS 500"))
+                                        // Parse actual connection port
+                                        received = received.Substring(received.IndexOf("PORT:") + 5);
+                                        portStr = received.Substring(0, received.IndexOf("\r"));
+                                        if (int.TryParse(portStr, out int cmdPort))
                                         {
-                                            // Parse actual connection port
-                                            received = received.Substring(received.IndexOf("PORT:") + 5);
-                                            portStr = received.Substring(0, received.IndexOf("\r"));
-                                            if (int.TryParse(portStr, out int cmdPort))
-                                            {
-                                                s.SendTo(Encoding.ASCII.GetBytes("SUS\0"), new IPEndPoint(IP, cmdPort));
-                                                string cmd = $"\r\n1\r\n1HISENSE_DELIMITER2HISENSE_DELIMITER2HISENSE_DELIMITER{key}HISENSE_DELIMITER10HISENSE_DELIMITER0HISENSE_DELIMITER0\r\n\r\n\0";
-                                                cmd = "CMD " + (cmd.Length + 10).ToString("000000") + cmd;
-                                                s.SendTo(Encoding.ASCII.GetBytes(cmd), new IPEndPoint(IP, cmdPort));
-                                                bufSize = s.Receive(buf);
-                                                s.SendTo(Encoding.ASCII.GetBytes("END 0000\r\n"), new IPEndPoint(IP, cmdPort));
-                                            }
+                                            s.SendTo(Encoding.ASCII.GetBytes("SUS\0"), new IPEndPoint(IP, cmdPort));
+                                            string cmd = $"\r\n1\r\n1HISENSE_DELIMITER2HISENSE_DELIMITER2HISENSE_DELIMITER{key}HISENSE_DELIMITER10HISENSE_DELIMITER0HISENSE_DELIMITER0\r\n\r\n\0";
+                                            cmd = "CMD " + (cmd.Length + 10).ToString("000000") + cmd;
+                                            s.SendTo(Encoding.ASCII.GetBytes(cmd), new IPEndPoint(IP, cmdPort));
+                                            bufSize = s.Receive(buf);
+                                            result = true;
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine(ex.Message);
-                    }
-                });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
             }
+            return result;
         }
 
         public async Task SendMacroAsync(HisenseKeyMacro macro)
         {
             if (IsActive)
             {
-                foreach (var key in macro.Commands)
+                foreach (var cmd in macro.Commands)
                 {
-                    await SendKeyAsync(key);
-                    await Task.Delay(1000);
+                    // Try to re-send key twice (if first time fails)
+                    if (!SendKey(cmd.Key))
+                    {
+                        await Task.Delay(500);
+                        // If SendKey() fails second time, abort the loop
+                        if (!SendKey(cmd.Key))
+                            break;
+                    }
+                    await Task.Delay(cmd.Delay);
                 }
             }
         }
