@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Collections.Generic;
+using Hisense;
 
 namespace HisenseTest
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HisenseTest
+namespace Hisense
 {
     public class HisenseKeyMacro
     {

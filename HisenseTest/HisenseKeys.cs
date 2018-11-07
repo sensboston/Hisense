@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace HisenseTest
+namespace Hisense
 {
     /// <summary>
     /// All available Hisense TV IP remote keys
